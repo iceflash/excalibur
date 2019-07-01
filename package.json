@@ -1,0 +1,22 @@
+{
+  "name": "excalibur",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "simpleState-dev": "webpack-dev-server --config ./simpleState/webpack.config.js --mode=development --env.target=client",
+    "simpleState-build": "webpack --config ./simpleState/webpack.config.js --mode=development --env.target=client"
+  },
+  "author": "iceflash",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.4.5",
+    "babel": "^6.23.0",
+    "babel-loader": "^8.0.6",
+    "html-webpack-plugin": "^3.2.0",
+    "webpack": "^4.35.0",
+    "webpack-cli": "^3.3.5",
+    "webpack-dev-server": "^3.7.2"
+  }
+}
