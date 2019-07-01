@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "simpleState-dev": "webpack-dev-server --config ./simpleState/webpack.config.js --mode=development --env.target=client",
-    "simpleState-build": "webpack --config ./simpleState/webpack.config.js --mode=development --env.target=client"
+    "simpleApp-dev": "webpack-dev-server --config ./simpleApp/webpack.config.js --mode=development --env.target=client",
+    "simpleApp-build": "webpack --config ./simpleApp/webpack.config.js --mode=development --env.target=client"
   },
   "author": "iceflash",
   "license": "ISC",
