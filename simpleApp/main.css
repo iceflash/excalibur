@@ -30,6 +30,14 @@ section {
   -moz-border-radius: 10px;
 }
 
+/*.formDlg:hover {
+  -moz-transform: rotate(15deg); 
+  -ms-transform: rotate(15deg); 
+  -webkit-transform: rotate(15deg); 
+  -o-transform: rotate(15deg);
+  transform: rotate(15deg);
+}*/
+
 .btn {
   background-color: var(--accent-color);
   margin: 0.5em;
@@ -38,6 +46,15 @@ section {
   border-radius: 20px;
   -webkit-border-radius: 20px;
   -moz-border-radius: 20px;
+  cursor: pointer;
+}
+.glow{
+  transition-property: background-color;
+  transition-duration: 1s;
+}
+
+.btn:hover {
+  background-color: var(--dark-primary-color);
 }
 
 /*Palette*/

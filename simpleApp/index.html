@@ -10,25 +10,14 @@
 </head>
 <body>
     <script src="./app.bundle.js"></script>
-    <header id="appbar"> App bar menu</header>
-    
+    <header id="appbar">
+        <a href="#/">App bar menu</a>
+        <a href="#/about">about</a>
+    </header>
     <section>
-        <h1>This is header 1</h1>
-        <p>paragraph</p>
-        <div class="formDlg">
-            <p>paragraph</p>
-            <div>
-                <infoText data-v="field">111</infoText>
-    
-                <div id="infoText" data-info="" data-v="field">field 1:</div>
-    
-                <input id="formField" data-v="field">
-            </div>
-            <div>                
-            </div>
-
-            <span class="btn">Try it now!</span>
-        </div>  
+        <router-view/>
+    </section>
+    <section>
     </section>
 </body>
 </html>

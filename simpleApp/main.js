@@ -1,26 +1,28 @@
 import state from './store';
 import App from './App';
 
+import homeView from './views/home';
+import aboutView from './views/about';
+
 console.log('main script');
 
 const app = new App();
 
-// app.subscribe('field', (e) => {
-//   console.log('[sub]', e);
-// })
+const routes = {
+  '/': homeView,
+  '/about': aboutView,
+};
+
+app.routes = routes;
 
 window.addEventListener('load', () =>{
   console.log('loaded...');
-
-  //init
-  const formField = document.getElementById('formField');
-  console.log(formField.attributes['data-v'].value);
-
-  formField.addEventListener('input', (event) => {
-      app.data[formField.attributes['data-v'].value] = formField.value;
-  });
-
-  document.addEventListener('input', (event) => {
-    // console.log('[doc]',event);
-  });
 });
+
+window.addEventListener('loadend', (e) => {
+  console.log('[loadend]',e);
+})
+
+window.addEventListener('loadstart', (e) => {
+  console.log('[loadstart]',e);
+})

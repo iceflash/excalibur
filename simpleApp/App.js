@@ -9,10 +9,14 @@ class App extends Observable{
   constructor (){  
     
     super();
+
     //app data (will be reactive)
     this.data = {
       field: '',
     };
+
+    this.routerView = {};
+    this.routes = {};
    
     this.makeReactive(this.data);
 
@@ -21,19 +25,49 @@ class App extends Observable{
 
     function onLoadinit(){
       console.log('[app]','init on load');
-      this.bindData();
-      console.log('[app]',this.data);
+
+      //init router
+      //1. set event listners
+      window.addEventListener('hashchange', (event) => {
+        
+        this.routerView = document.querySelectorAll(`router-view`)[0];
+        // get hash
+        let path = Array.from(window.location.hash);
+        if(path.length === 0) {
+          path = '/';
+        } else {
+          path.splice(0,1);
+          path = path.join('');
+        }
+
+        console.log('[hash]', this.routes[path]);
+
+        // this.routerView.innerHTML = this.routes[path].render(this.routerView);
+        this.routes[path].render(this.routerView);
+        this.bindData();
+      });
+
+      window.location.hash = '#/';
+
+      console.log('[app-end init]',this.data);
     }
   }
   
 
   bindData(){
+
+    this.observers = {};
+
     //find which elements need to be reactive
     const dataEl = document.querySelectorAll(`[data-v]`);
     dataEl.forEach((vel) => {
       //subscribe for changes
       this.subscribe(vel.attributes['data-v'].value, (data) => {
         vel.textContent = data;
+      });
+      //set input listner (default)
+      vel.addEventListener('input', (e) => {
+        this.data[vel.attributes['data-v'].value] = vel.value;
       });
     });
   }
@@ -60,7 +94,15 @@ class App extends Observable{
     }
   }
 
+  setRoutes(routes){
+
+  }
+
   updateView(){
+  }
+
+  routerNav(path){
+    
   }
 
 }
