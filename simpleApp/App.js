@@ -12,7 +12,8 @@ class App extends Observable{
 
     //app data (will be reactive)
     this.data = {
-      field: '',
+      field: '', //simple input field
+      selectType: '', // for radio test
     };
 
     this.routerView = {};
@@ -29,27 +30,12 @@ class App extends Observable{
       //init router
       //1. set event listners
       window.addEventListener('hashchange', (event) => {
-        
-        this.routerView = document.querySelectorAll(`router-view`)[0];
-        // get hash
-        let path = Array.from(window.location.hash);
-        if(path.length === 0) {
-          path = '/';
-        } else {
-          path.splice(0,1);
-          path = path.join('');
-        }
-
-        console.log('[hash]', this.routes[path]);
-
-        // this.routerView.innerHTML = this.routes[path].render(this.routerView);
-        this.routes[path].render(this.routerView);
-        this.bindData();
+        this.routerNav(event);
       });
+      
+      if(window.location.hash = '#/') this.routerNav(); else window.location.hash = '#/';
 
-      window.location.hash = '#/';
-
-      console.log('[app-end init]',this.data);
+      console.log('[app-end init]',this.data, );
     }
   }
   
@@ -101,8 +87,22 @@ class App extends Observable{
   updateView(){
   }
 
-  routerNav(path){
-    
+  routerNav(){
+    this.routerView = document.querySelectorAll(`router-view`)[0];
+    // get hash
+    let path = Array.from(window.location.hash);
+    if(path.length === 0) {
+      path = '/';
+    } else {
+      path.splice(0,1);
+      path = path.join('');
+    }
+
+    console.log('[hash]', this.routes[path]);
+
+    // this.routerView.innerHTML = this.routes[path].render(this.routerView);
+    this.routes[path].render(this.routerView);
+    this.bindData();
   }
 
 }

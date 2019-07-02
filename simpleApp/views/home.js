@@ -16,22 +16,17 @@ function render(element){
     
                 <input id="formField" data-v="field">
             </div>
-            <div>                
+            <div>
+                <div id="infoText" data-info="" data-v="selectType"></div>
+                <input type="radio" name="group" data-v="selectType" value="first">1</input>
+                <input type="radio" name="group" data-v="selectType" value="second">2</input>
+                <input type="radio" name="group" data-v="selectType" value="third">3</input>
             </div>
 
             <span class="btn glow">Try it now!</span>
         </div>
     `;
     element.innerHTML = res;
-
-    // const formField = document.getElementById('formField');
-    // // console.log(formField.attributes['data-v'].value);
-
-    // formField.addEventListener('input', (event) => {
-    //     app.data[formField.attributes['data-v'].value] = formField.value;
-    // });
-
-    // return res;
 }
 
 View.render = render;

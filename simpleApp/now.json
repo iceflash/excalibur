@@ -1,0 +1,9 @@
+{
+    "name": "simpleApp",
+
+    "builds": [
+        { "src": "app.bundle.js", "use": "@now/static" },
+        { "src": "main.css", "use": "@now/static" },
+        { "src": "*.html", "use": "@now/static" }
+      ]
+}
