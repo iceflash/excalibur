@@ -16,6 +16,7 @@ const routes = {
 };
 
 app.routes = routes;
+window.$app = app;
 
 window.addEventListener('load', () =>{
   console.log('loaded...');
@@ -28,3 +29,7 @@ window.addEventListener('loadend', (e) => {
 window.addEventListener('loadstart', (e) => {
   console.log('[loadstart]',e);
 })
+
+function createGameRoom(){
+  console.log(`create game room `);
+}

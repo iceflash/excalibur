@@ -1,3 +1,5 @@
+import Ball from "./../../pong/ball";
+import PlayerPad from "./../../pong/playerPad";
 
 const CLIENT_CMD_CREATE_ROOM  = 'cr_room';
 const CLIENT_CMD_JOIN_ROOM    = 'jn_room';
@@ -7,94 +9,7 @@ const SERVER_CMD_INFO         = 'info';
 const SERVER_CMD_ERROR        = 'err';
 const SERVER_CMD_GAME_INFO    = 'ginfo';
 
-const ball = {
-  x: 200,
-  y: 200,
-  r: 10,
-  speed: 0,
-  direction: 70, // 0 is down direction
-
-  draw: function(ctx){
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r, 0, 180);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
-  },
-
-  move: function(){
-    this.borderCollide(canvas.width, canvas.height);
-
-    this.x += Math.sin(this.direction*Math.PI/180)*this.speed;
-    this.y += Math.cos(this.direction*Math.PI/180)*this.speed;
-  },
-
-  borderCollide: function (w,h){
-    
-    if(this.x+this.r>w ||this.x-this.r<0){
-      this.direction = this.direction * -1;
-      console.log('[collide-x]', this.direction);
-      return true;
-    }
-
-    if(this.y+this.r>h ||this.y-this.r<0){
-      this.direction = 180 - this.direction; 
-      
-      console.log('[collide-y]', this.direction);
-      return true;
-    }
-  },
-
-  rectCollide: function (rect){
-    
-    //left pad collide
-    if((this.x - this.r) < rect.x+rect.w &&
-        ((this.y+this.r) > rect.y &&
-        (this.y-this.r) < rect.y+rect.h)){
-
-      // make bounce
-      this.direction = this.direction * -1;
-      console.log('[collide-with-pad-x]', this.direction);
-      return true;
-    }
-  }
-
-};
-
-const playerPad = {
-  x: 10,
-  y: 10,
-  w: 10,
-  h: 50,
-  speed: 3,
-  id: 0,
-  direction: 0, // 0 is down direction
-
-  draw: function(ctx){
-    ctx.beginPath();
-    ctx.fillStyle = "#FF95FF";
-    ctx.fillRect(this.x, this.y, this.w, this.h);
-    // ctx.fill();
-    ctx.closePath();
-  },
-
-  movePad: function(dy){
-    
-    this.y += dy;
-    if (this.borderCollide(canvas.width, canvas.height)) {
-      if(this.y < 0) this.y =0;
-      if(this.y + this.h >= canvas.height) this.y = canvas.height - this.h;
-    }
-  },
-
-  borderCollide: function (w,h){
-    
-    if(this.y+this.h > h ||this.y < 0){       
-      // console.log('[collide-pad-y]', this.y);
-      return true;
-    }
-  },
-};
+// let playerPad1, playerPad2, ball;
 
 let ctx, canvas; //main canvas
 let timer;
@@ -104,34 +19,52 @@ let stopped=false;
 
 let connection; // websocket
 
-let plx, ply;
+const sendDataInterval = 100;
+// let plx, ply;
+
+const gameState = {
+  playerPad1: '',
+  playerPad2: '',
+  ball: '',
+  sball: '',
+  curPlayer: '',
+  plx: 0, ply: 0, // last pointer x,y. for delta in speed boost for moving pad
+};
+
 
 function controller(e){
   
+  if(!gameState.curPlayer) return
+
+  // console.log(gameState.curPlayer);
+
   //move pad
-  if(!plx) plx = e.x;
-  if(!ply) ply = e.y;
+  if(!gameState.plx) gameState.plx = e.x;
+  if(!gameState.ply) gameState.ply = e.y;
 
   //get delta and direction
   //let delta = Math.min((Math.max(ply, e.y) - Math.min(ply, e.y)), 10);
-  let delta = Math.max(ply, e.y) - Math.min(ply, e.y);
+  let delta = Math.max(gameState.ply, e.y) - Math.min(gameState.ply, e.y);
 
-  if(ply < e.y) {playerPad.movePad(delta)} else {playerPad.movePad(-delta)}
+  if(gameState.ply < e.y) {gameState.curPlayer.movePad(delta)} else {gameState.curPlayer.movePad(-delta)}
   
-  plx = e.x;
-  ply = e.y;
-
-  // console.log(e, delta);
+  gameState.plx = e.x;
+  gameState.ply = e.y;
 }
 
+/**
+ * key pres up/dopwn
+ * @param {e} event 
+ */
 function controllerPress(e){
   
+  if(!gameState.curPlayer) return
+
   let delta = 5;
 
-  if(e.keyCode == '38') playerPad.movePad(-delta) // UP
-  if(e.keyCode == '40') playerPad.movePad(delta) // DOWN
-  
-  // console.log(e);
+  // TODO: keycode in constant
+  if(e.keyCode == '38') gameState.curPlayer.movePad(-delta) // UP
+  if(e.keyCode == '40') gameState.curPlayer.movePad(delta) // DOWN
 }
 
 function loop(){
@@ -144,9 +77,12 @@ function loop(){
   fps = 1/delta;
   lastrun = performance.now();
 
-  ball.move();
-  //collision
-  ball.rectCollide(playerPad)
+  // calc game state
+  gameState.ball.move();
+  //collision only for curPlayer(?)
+  gameState.ball.rectCollide(gameState.playerPad1);
+  gameState.ball.rectCollide(gameState.playerPad2);
+
   //clear
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -155,8 +91,10 @@ function loop(){
   ctx.fillText(`fps: ${fps.toFixed(2)}`, 280, 10);
   
   //draw
-  ball.draw(ctx);
-  playerPad.draw(ctx);
+  gameState.ball.draw(ctx);
+  gameState.sball.draw(ctx);
+  gameState.playerPad1.draw(ctx);
+  gameState.playerPad2.draw(ctx);
 
   ctx.restore();
 
@@ -166,15 +104,15 @@ function loop(){
 function getGameState(){
   let state = {
     pl: {
-      x: playerPad.x,
-      y: playerPad.y,
-      id: playerPad.id,
+      x: gameState.curPlayer.x,
+      y: gameState.curPlayer.y,
+      id: gameState.curPlayer.id,
     },
     ball: {
-      x: ball.x,
-      y: ball.y,
+      x: gameState.ball.x,
+      y: gameState.ball.y,
     },
-    gameid: 1,
+    gameid: 1, // FIXME
   };
 
   return state;
@@ -183,7 +121,7 @@ function getGameState(){
 // handler for timer
 function sendGameState(){
   const state = getGameState();
-  pck = {
+  const pck = {
     cmd: CLIENT_CMD_SEND,
     data: state
   }
@@ -199,9 +137,12 @@ function createGameRoom(){
   
   sendMsg(dataPck)
 
-  //set timer for send data every n ms
-  const n = 100;
-  timer = setInterval(sendGameState, n);
+  //FIXME: set timer for send data every n ms
+    
+  timer = setInterval(sendGameState, sendDataInterval);
+  
+  gameState.playerPad1.id = 100;
+  gameState.curPlayer = gameState.playerPad1;
 }
 
 function joinGameRoom(){
@@ -211,7 +152,13 @@ function joinGameRoom(){
     gameid: 1,
   };
 
-  connection.send(JSON.stringify(dataPck));
+  sendMsg(dataPck);
+
+  //stub
+  gameState.playerPad2.id  = 102;
+  gameState.curPlayer = gameState.playerPad2;
+
+  timer = setInterval(sendGameState, sendDataInterval);
 }
 
 function sendMsg(msg){
@@ -222,7 +169,19 @@ function init(){
     canvas = document.getElementById('pong');
     ctx = canvas.getContext('2d');
 
-    stopped = true;
+    gameState.ball        = new Ball(canvas.width, canvas.height);
+    gameState.sball       = new Ball(canvas.width, canvas.height);
+    gameState.sball.fillStyle = "rgba(100,150,185,0.5)";
+    
+    gameState.playerPad1 = new PlayerPad(canvas.width, canvas.height);
+    
+    gameState.playerPad2 = new PlayerPad(canvas.width, canvas.height);
+    
+    gameState.playerPad2.fillStyle = "#f53e1e";
+    gameState.playerPad2.x   = canvas.width - gameState.playerPad2.w - 10;
+    gameState.playerPad2.id  = 102;
+    
+    stopped = true; // stoped main loop
 
     //start main game loop
     window.requestAnimationFrame(loop);
@@ -248,14 +207,31 @@ function init(){
     }
 
     connection.onmessage = (ev) => {
-      console.log('ws-msg', ev.data);
+      // console.log('ws-msg', ev.data);
       let msg = JSON.parse(ev.data);
 
       switch (msg.cmd) {
         case SERVER_CMD_INFO:
           console.log('ws-info', msg.data);
           break;
-      
+        case SERVER_CMD_GAME_INFO:
+          //sync objects (only enemy and ball) FIXME:
+          if(gameState.curPlayer.id === gameState.playerPad1.id){
+            if(msg.data[gameState.playerPad2.id]){
+              gameState.playerPad2.x = msg.data[gameState.playerPad2.id].x;
+              gameState.playerPad2.y = msg.data[gameState.playerPad2.id].y;
+            }
+          }else{
+            if(msg.data[gameState.playerPad1.id]){
+              gameState.playerPad1.x = msg.data[gameState.playerPad1.id].x;
+              gameState.playerPad1.y = msg.data[gameState.playerPad1.id].y;
+            }
+          }
+          // gameState.ball.x = msg.data.ball.x;
+          // gameState.ball.y = msg.data.ball.y;
+          gameState.sball.x = msg.data.ball.x;
+          gameState.sball.y = msg.data.ball.y;
+          break;
         default:
           break;
       }
@@ -294,6 +270,8 @@ const View = {
     console.log('[pong-view] destroy');
     stopped = true;
     
+    connection.close();
+
     window.removeEventListener('mousemove', controller);
     window.removeEventListener('keydown', controllerPress);
 

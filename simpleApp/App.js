@@ -14,6 +14,7 @@ class App extends Observable{
     this.data = {
       field: '', //simple input field
       selectType: '', // for radio test
+      roomId: 1,
     };
 
     this.routerView = {};
@@ -51,7 +52,11 @@ class App extends Observable{
       //subscribe for changes
       this.subscribe(vel.attributes['data-v'].value, (data) => {
         vel.textContent = data;
+        vel.value = data;
       });
+      //notify initial
+      this.notify(vel.attributes['data-v'].value, this.data[vel.attributes['data-v'].value]);
+
       //set input listner (default)
       vel.addEventListener('input', (e) => {
         this.data[vel.attributes['data-v'].value] = vel.value;
@@ -108,6 +113,12 @@ class App extends Observable{
     this.currRoute = path;
 
     this.bindData();
+  }
+
+  createGameRoom(){
+    console.log(`create game room ${this.data.roomId}`);
+
+    //create room
   }
 
 }
