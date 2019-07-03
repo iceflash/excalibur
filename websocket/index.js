@@ -28,7 +28,10 @@ function syncGamesState(){
   const state = games[1].state;
   // send info about game to players
   const pl1 = state.pl1;
-  const ws = games[1][pl1];
+  const pl2 = state.pl2;
+
+  const ws  = games[1][pl1];
+  const ws2 = games[1][pl2];
 
   //send
   const pck = {
@@ -36,7 +39,10 @@ function syncGamesState(){
     data: state,
   }
 
+  console.log('[sync]',pck);
+
   ws.send(JSON.stringify(pck));
+  if(pl2!=0) ws2.send(JSON.stringify(pck));
 }
 
 setInterval(syncGamesState, 1000);
