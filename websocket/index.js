@@ -22,7 +22,7 @@ const app = https.createServer({
 const wss = new WebSocket.Server({ server: app});
 
 function syncGamesState(){
-  //test 1 game
+  //test 1 game (how to end game?)
   if(!games[1]) return;
 
   const state = games[1].state;
@@ -77,18 +77,20 @@ wss.on('connection', (ws) => {
       games[msg.gameid].pl2 = 102;
       games[msg.gameid][102] = ws; //save player connect
 
+      ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: 'game joined'}));
+
     }
 
     switch (msg.cmd) {
       case CLIENT_CMD_CREATE_ROOM:
           
           games[msg.gameid] = {
-            state: {pl1: 100, pl2: 0,},
+            state: {pl1: 100, pl2: 102,},
             100: ws,
           }
           // send result
           ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: 'game created'}));
-          ws.send(JSON.stringify({cmd: SERVER_CMD_GAME_INFO, data: games[msg.gameid].state}));
+          //ws.send(JSON.stringify({cmd: SERVER_CMD_GAME_INFO, data: games[msg.gameid].state}));
         break;
       case CLIENT_CMD_SEND:
         // data from client player
@@ -96,6 +98,8 @@ wss.on('connection', (ws) => {
         // sync game state
         games[msg.data.gameid].state[msg.data.pl.id] =  msg.data.pl;
         games[msg.data.gameid].state.ball =  msg.data.ball;
+
+        console.log('[gi-state]', games[msg.data.gameid]);
 
         break;
       default:
