@@ -66,13 +66,11 @@ wss.on('connection', (ws) => {
         break;
       case CLIENT_CMD_SEND:
         // data from client player
-        console.log('[gi]', msg.state.gameid, msg.state.pl, msg.state.ball);
+        console.log('[gi]', msg.data.gameid, msg.data.pl, msg.data.ball);
         break;
       default:
         break;
     }
   })
 
-  // send hello)
-  ws.send('ho!')
 })
