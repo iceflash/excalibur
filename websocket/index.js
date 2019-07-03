@@ -13,6 +13,7 @@ const SERVER_CMD_INFO         = 'info';
 const SERVER_CMD_ERROR        = 'err';
 const SERVER_CMD_GAME_INFO    = 'ginfo';
 
+const sendDataInterval = 100;
 
 const app = https.createServer({
     key: fs.readFileSync('/var/node/certs/server_local.key'),
@@ -39,22 +40,22 @@ function syncGamesState(){
     data: state,
   }
 
-  console.log('[sync]',pck);
+  // console.log('[sync]',pck);
 
   ws.send(JSON.stringify(pck));
   if(pl2!=0) ws2.send(JSON.stringify(pck));
 }
 
-setInterval(syncGamesState, 1000);
+setInterval(syncGamesState, sendDataInterval);
 
 wss.on('connection', (ws) => {
-  console.log('[conn]');
+  console.log('[new conn]');
   
   // listner for connection message
   ws.on('message', (message) => {
     let msg = JSON.parse(message);
     
-    console.log('[rcv-msg]', msg);
+    // console.log('[rcv-msg]', msg);
     // messages from client
     // 1. create game room -> return player id (maybe in connection)
     // 2. join game room -> return player id (maybe in connection)
@@ -94,12 +95,12 @@ wss.on('connection', (ws) => {
         break;
       case CLIENT_CMD_SEND:
         // data from client player
-        console.log('[gi]', msg.data.gameid, msg.data.pl, msg.data.ball);
+        // console.log('[gi]', msg.data.gameid, msg.data.pl, msg.data.ball);
         // sync game state
         games[msg.data.gameid].state[msg.data.pl.id] =  msg.data.pl;
         games[msg.data.gameid].state.ball =  msg.data.ball;
 
-        console.log('[gi-state]', games[msg.data.gameid]);
+        // console.log('[gi-state]', games[msg.data.gameid]);
 
         break;
       default:
