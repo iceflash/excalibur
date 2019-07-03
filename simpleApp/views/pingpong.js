@@ -173,14 +173,14 @@ function init(){
     }
 
     connection.onopen = () => {
-      connection.send('hey');
+      connection.send('hey!');
     }
 
     connection.onmessage = (ev) => {
       console.log('ws-msg', ev)
     }
 
-    connection.onclose = (ev) => { console.log(ev)}
+    connection.onclose = (ev) => { console.log('[ws-close]', ev)}
 }
 
 
