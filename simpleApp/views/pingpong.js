@@ -1,8 +1,17 @@
+
+const CLIENT_CMD_CREATE_ROOM  = 'cr_room';
+const CLIENT_CMD_JOIN_ROOM    = 'jn_room';
+const CLIENT_CMD_SEND         = 'snd';
+
+const SERVER_CMD_INFO         = 'info';
+const SERVER_CMD_ERROR        = 'err';
+const SERVER_CMD_GAME_INFO    = 'ginfo';
+
 const ball = {
   x: 200,
   y: 200,
   r: 10,
-  speed: 3,
+  speed: 0,
   direction: 70, // 0 is down direction
 
   draw: function(ctx){
@@ -58,6 +67,7 @@ const playerPad = {
   w: 10,
   h: 50,
   speed: 3,
+  id: 0,
   direction: 0, // 0 is down direction
 
   draw: function(ctx){
@@ -153,13 +163,45 @@ function loop(){
   window.requestAnimationFrame(loop);
 }
 
+function getGameState(){
+  let state = {
+    pl: {
+      x: playerPad.x,
+      y: playerPad.y,
+      id: playerPad.id,
+    },
+    ball: {
+      x: ball.x,
+      y: ball.y,
+    },
+    gameid: 1,
+  };
+
+  return state;
+}
+
+// handler for timer
+function sendGameState(){
+  const state = getGameState();
+  pck = {
+    cmd: CLIENT_CMD_SEND,
+    data: state
+  }
+  sendMsg(pck);
+}
+
 function createGameRoom(){
   
   const dataPck = {
     cmd: 'cr_room',
     gameid: 1,
   };
-  connection.send(dataPck);
+  
+  sendMsg(dataPck)
+
+  //set timer for send data every n ms
+  const n = 100;
+  timer = setInterval(sendGameState, n);
 }
 
 function joinGameRoom(){
@@ -169,9 +211,12 @@ function joinGameRoom(){
     gameid: 1,
   };
 
-  connection.send(dataPck);
+  connection.send(JSON.stringify(dataPck));
 }
 
+function sendMsg(msg){
+  connection.send(JSON.stringify(msg))
+}
 
 function init(){
     canvas = document.getElementById('pong');
@@ -199,14 +244,27 @@ function init(){
     }
 
     connection.onopen = () => {
-      connection.send('hey!');
+      //connection ready
     }
 
     connection.onmessage = (ev) => {
-      console.log('ws-msg', ev)
+      console.log('ws-msg', ev.data);
+      let msg = JSON.parse(ev.data);
+
+      switch (msg.cmd) {
+        case SERVER_CMD_INFO:
+          console.log('ws-info', msg.data);
+          break;
+      
+        default:
+          break;
+      }
     }
 
-    connection.onclose = (ev) => { console.log('[ws-close]', ev)}
+    connection.onclose = (ev) => { 
+      console.log('[ws-close]', ev)
+      clearInterval(timer);
+    }
 }
 
 
@@ -240,7 +298,7 @@ const View = {
     window.removeEventListener('keydown', controllerPress);
 
     //stop timers
-    // clearInterval(timer);
+    clearInterval(timer);
   },
 };
 

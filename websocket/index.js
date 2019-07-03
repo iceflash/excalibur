@@ -7,6 +7,8 @@ let games = {}; // for games rooms
 
 const CLIENT_CMD_CREATE_ROOM  = 'cr_room';
 const CLIENT_CMD_JOIN_ROOM    = 'jn_room';
+const CLIENT_CMD_SEND         = 'snd';
+
 const SERVER_CMD_INFO         = 'info';
 const SERVER_CMD_ERROR        = 'err';
 const SERVER_CMD_GAME_INFO    = 'ginfo';
@@ -41,20 +43,33 @@ wss.on('connection', (ws) => {
       // else{ //game already exist
       //   ws.send({cmd: SERVER_CMD_ERROR, data:'game with this id is already created'})
       // }
-
-      games[msg.gameid] = {
-        pl1: 100, pl2: 0,
-      }
-      // send result
-      ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: 'game created'}));
-      ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: games[msg.gameid]}));
     }
 
     if(msg.cmd == CLIENT_CMD_JOIN_ROOM){
       
       // generate player id, save, for now stub:
       games[msg.gameid].pl2 = 102;
+      games[msg.gameid][102] = ws; //save player connect
 
+    }
+
+    switch (msg.cmd) {
+      case CLIENT_CMD_CREATE_ROOM:
+          
+          games[msg.gameid] = {
+            state: {pl1: 100, pl2: 0,},
+            100: ws,
+          }
+          // send result
+          ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: 'game created'}));
+          ws.send(JSON.stringify({cmd: SERVER_CMD_GAME_INFO, data: games[msg.gameid].state}));
+        break;
+      case CLIENT_CMD_SEND:
+        // data from client player
+        console.log('[gi]', msg.state.gameid, msg.state.pl, msg.state.ball);
+        break;
+      default:
+        break;
     }
   })
 
