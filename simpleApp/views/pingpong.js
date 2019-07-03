@@ -92,6 +92,8 @@ let lastrun;
 let fps;
 let stopped=false;
 
+let connection; // websocket
+
 let plx, ply;
 
 function controller(e){
@@ -151,22 +153,46 @@ function loop(){
   window.requestAnimationFrame(loop);
 }
 
+function createGameRoom(){
+  
+  const dataPck = {
+    cmd: 'cr_room',
+    gameid: 1,
+  };
+  connection.send(dataPck);
+}
+
+function joinGameRoom(){
+  
+  const dataPck = {
+    cmd: 'jn_room',
+    gameid: 1,
+  };
+
+  connection.send(dataPck);
+}
+
+
 function init(){
     canvas = document.getElementById('pong');
     ctx = canvas.getContext('2d');
 
-    stopped = false;
+    stopped = true;
 
     //start main game loop
     window.requestAnimationFrame(loop);
     //set controll
     window.addEventListener('mousemove', controller);
     window.addEventListener('keydown', controllerPress);
-    // canvas.addEventListener('mousemove', controller);
+    
+    canvas.addEventListener('mousedown', (e) => {
+      stopped = !stopped;
+      window.requestAnimationFrame(loop);
+    });
 
     //check web socket
     const url = 'wss://icedev.pro:8001';
-    const connection = new WebSocket('wss://icedev.pro:8001');
+    connection = new WebSocket(url);
 
     connection.onerror = error => {
       console.log('[ws-error]', error)
@@ -185,9 +211,23 @@ function init(){
 
 
 const View = {
-  render: function(el){    
-    let res = ` <canvas id="pong" width=500 height="350" style="border:solid"></canvas>`;
+  render: function(el){
+    let res = `
+    <div class="formDlg">
+      Game id <input id="formField" data-v="roomId">
+      <span id="createBtn" class="btnsm glow" >Create game</span>
+      <span id="joinBtn" class="btnsm glow" onclick="console.log(this)">Join game</span>
+    </div>
+    <canvas id="pong" width=500 height="350" style="border:solid"></canvas>`;
     el.innerHTML = res;
+
+    // add handlers
+    const createBtn = document.getElementById('createBtn');
+    createBtn.onclick = createGameRoom;
+
+    const joinBtn = document.getElementById('joinBtn');
+    joinBtn.onclick = joinGameRoom;
+    
     //start init
     init();
   },
