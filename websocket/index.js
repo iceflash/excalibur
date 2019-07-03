@@ -21,6 +21,26 @@ const app = https.createServer({
 
 const wss = new WebSocket.Server({ server: app});
 
+function syncGamesState(){
+  //test 1 game
+  if(!games[1]) return;
+
+  const state = games[1].state;
+  // send info about game to players
+  const pl1 = state.pl1;
+  const ws = games[1][pl1];
+
+  //send
+  const pck = {
+    cmd: SERVER_CMD_GAME_INFO,
+    data: state,
+  }
+
+  ws.send(JSON.stringify(pck));
+}
+
+setInterval(syncGamesState, 1000);
+
 wss.on('connection', (ws) => {
   console.log('[conn]');
   
@@ -67,6 +87,10 @@ wss.on('connection', (ws) => {
       case CLIENT_CMD_SEND:
         // data from client player
         console.log('[gi]', msg.data.gameid, msg.data.pl, msg.data.ball);
+        // sync game state
+        games[msg.data.gameid].state[msg.data.pl.id] =  msg.data.pl;
+        games[msg.data.gameid].state.ball =  msg.data.ball;
+
         break;
       default:
         break;
