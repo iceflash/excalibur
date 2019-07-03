@@ -12,8 +12,9 @@ const CLIENT_CMD_SEND         = 'snd';
 const SERVER_CMD_INFO         = 'info';
 const SERVER_CMD_ERROR        = 'err';
 const SERVER_CMD_GAME_INFO    = 'ginfo';
+const SERVER_CMD_GET_READY    = 'ready';
 
-const sendDataInterval = 100;
+const sendDataInterval = 50;
 
 const app = https.createServer({
     key: fs.readFileSync('/var/node/certs/server_local.key'),
@@ -26,23 +27,47 @@ function syncGamesState(){
   //test 1 game (how to end game?)
   if(!games[1]) return;
 
-  const state = games[1].state;
-  // send info about game to players
-  const pl1 = state.pl1;
-  const pl2 = state.pl2;
+  // check if not started, but ready send get ready signal
+  if(!games[1].started && games[1].ready1 && games[1].ready2){
+    // send get ready
+    const pl1 = state.pl1;
+    const pl2 = state.pl2;
 
-  const ws  = games[1][pl1];
-  const ws2 = games[1][pl2];
+    const ws  = games[1][pl1];
+    const ws2 = games[1][pl2];
 
-  //send
-  const pck = {
-    cmd: SERVER_CMD_GAME_INFO,
-    data: state,
+    let pck = {
+      cmd: SERVER_CMD_GET_READY
+    }
+
+    pck = JSON.stringify(pck);
+    ws.send(pck);
+    ws2.send(pck);
+    games[1].started;
+    return;
   }
 
-  // console.log('[sync]',pck);
-  if(ws != undefined)  ws.send(JSON.stringify(pck));
-  if(ws2 != undefined) ws2.send(JSON.stringify(pck));
+  // players started the game send state
+  if(games[1].started){
+    const state = games[1].state;
+    // send info about game to players
+    const pl1 = state.pl1;
+    const pl2 = state.pl2;
+
+    const ws  = games[1][pl1];
+    const ws2 = games[1][pl2];
+
+    //send
+    let pck = {
+      cmd: SERVER_CMD_GAME_INFO,
+      data: state,
+    }
+
+    pck = JSON.stringify(pck);
+    // console.log('[sync]',pck);
+    if(ws != undefined)  ws.send(pck);
+    if(ws2 != undefined) ws2.send(pck);
+  }
 }
 
 setInterval(syncGamesState, sendDataInterval);
@@ -79,6 +104,8 @@ wss.on('connection', (ws) => {
 
       ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: 'game joined'}));
 
+      games[msg.gameid].ready2 = true;
+
     }
 
     switch (msg.cmd) {
@@ -87,6 +114,9 @@ wss.on('connection', (ws) => {
           games[msg.gameid] = {
             state: {pl1: 100, pl2: 102,},
             100: ws,
+            ready1: true,
+            ready2: false,
+            started: false,
           }
           // send result
           ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: 'game created'}));
