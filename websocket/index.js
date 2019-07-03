@@ -41,9 +41,8 @@ function syncGamesState(){
   }
 
   // console.log('[sync]',pck);
-
-  ws.send(JSON.stringify(pck));
-  if(pl2!=0) ws2.send(JSON.stringify(pck));
+  if(ws != undefined)  ws.send(JSON.stringify(pck));
+  if(ws2 != undefined) ws2.send(JSON.stringify(pck));
 }
 
 setInterval(syncGamesState, sendDataInterval);
