@@ -30,5 +30,8 @@ function render(element){
 }
 
 View.render = render;
+View.destroy = () =>{
+    console.log('[home] destroy');
+};
 
 export default View;

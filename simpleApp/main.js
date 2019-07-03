@@ -3,6 +3,7 @@ import App from './App';
 
 import homeView from './views/home';
 import aboutView from './views/about';
+import pongView from './views/pingpong';
 
 console.log('main script');
 
@@ -11,6 +12,7 @@ const app = new App();
 const routes = {
   '/': homeView,
   '/about': aboutView,
+  '/pong': pongView,
 };
 
 app.routes = routes;

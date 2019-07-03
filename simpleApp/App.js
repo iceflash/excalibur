@@ -18,6 +18,7 @@ class App extends Observable{
 
     this.routerView = {};
     this.routes = {};
+    this.currRoute = '';
    
     this.makeReactive(this.data);
 
@@ -89,6 +90,9 @@ class App extends Observable{
 
   routerNav(){
     this.routerView = document.querySelectorAll(`router-view`)[0];
+    //destroy current view
+    if(this.currRoute !=='') this.routes[this.currRoute].destroy();
+
     // get hash
     let path = Array.from(window.location.hash);
     if(path.length === 0) {
@@ -100,8 +104,9 @@ class App extends Observable{
 
     console.log('[hash]', this.routes[path]);
 
-    // this.routerView.innerHTML = this.routes[path].render(this.routerView);
     this.routes[path].render(this.routerView);
+    this.currRoute = path;
+
     this.bindData();
   }
 
