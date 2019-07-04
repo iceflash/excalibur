@@ -30,6 +30,7 @@ function syncGamesState(){
   // check if not started, but ready send get ready signal
   if(!games[1].started && games[1].ready1 && games[1].ready2){
     // send get ready
+    const state = games[1].state;
     const pl1 = state.pl1;
     const pl2 = state.pl2;
 
@@ -43,7 +44,7 @@ function syncGamesState(){
     pck = JSON.stringify(pck);
     ws.send(pck);
     ws2.send(pck);
-    games[1].started;
+    games[1].started = true;
     return;
   }
 
