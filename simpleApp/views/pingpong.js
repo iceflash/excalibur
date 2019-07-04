@@ -8,6 +8,7 @@ const CLIENT_CMD_SEND         = 'snd';
 const SERVER_CMD_INFO         = 'info';
 const SERVER_CMD_ERROR        = 'err';
 const SERVER_CMD_GAME_INFO    = 'ginfo';
+const SERVER_CMD_GET_READY    = 'ready';
 
 // let playerPad1, playerPad2, ball;
 
@@ -19,7 +20,7 @@ let stopped=false;
 
 let connection; // websocket
 
-const sendDataInterval = 100;
+const sendDataInterval = 30;
 // let plx, ply;
 
 const gameState = {
@@ -131,7 +132,7 @@ function sendGameState(){
 function createGameRoom(){
   
   const dataPck = {
-    cmd: 'cr_room',
+    cmd: CLIENT_CMD_CREATE_ROOM,
     gameid: 1,
   };
   
@@ -148,7 +149,7 @@ function createGameRoom(){
 function joinGameRoom(){
   
   const dataPck = {
-    cmd: 'jn_room',
+    cmd: CLIENT_CMD_JOIN_ROOM,
     gameid: 1,
   };
 
@@ -231,6 +232,11 @@ function init(){
           // gameState.ball.y = msg.data.ball.y;
           gameState.sball.x = msg.data.ball.x;
           gameState.sball.y = msg.data.ball.y;
+          break;
+        case SERVER_CMD_GET_READY:
+          // start timeout
+          console.log('get ready!');
+          setTimeout(() => {gameState.ball.speed = 3}, 3000);
           break;
         default:
           break;
