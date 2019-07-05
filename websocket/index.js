@@ -3,6 +3,8 @@ const util = require('util');
 const fs = require('fs');
 const WebSocket = require('ws');
 
+const Ball = require('./../pong/ball');
+
 let games = {}; // for games rooms
 
 const CLIENT_CMD_CREATE_ROOM  = 'cr_room';
@@ -15,6 +17,13 @@ const SERVER_CMD_GAME_INFO    = 'ginfo';
 const SERVER_CMD_GET_READY    = 'ready';
 
 const sendDataInterval = 50;
+const FPS = 60;
+
+// for now, later may be changable for game
+const canvasW = 500;
+const canvasH = 350;
+
+console.log('[ws-pong] init...');
 
 const app = https.createServer({
     key: fs.readFileSync('/var/node/certs/server_local.key'),
@@ -23,6 +32,7 @@ const app = https.createServer({
 
 const wss = new WebSocket.Server({ server: app});
 
+// main loop
 function syncGamesState(){
   //test 1 game (how to end game?)
   if(!games[1]) return;
@@ -48,9 +58,17 @@ function syncGamesState(){
     return;
   }
 
-  // players started the game send state
+  // game started make TICK and send state
   if(games[1].started){
+
     const state = games[1].state;
+    // check collisions and make move ball
+    games[1].ball.rectCollide(state[state.pl1]);
+    games[1].ball.rectCollide(state[state.pl2]);
+    games[1].ball.borderCollide(canvasW, canvasH);
+    
+    games[1].ball.move();
+    
     // send info about game to players
     const pl1 = state.pl1;
     const pl2 = state.pl2;
@@ -85,53 +103,40 @@ wss.on('connection', (ws) => {
     // 1. create game room -> return player id (maybe in connection)
     // 2. join game room -> return player id (maybe in connection)
     // 3. player pad control -> send other player
-    if(msg.cmd == CLIENT_CMD_CREATE_ROOM){
-      //console.log(msg.cmd);
-      
-      // TODO: for later use 
-      // if(!games[message.gameid]) {
-
-      // }
-      // else{ //game already exist
-      //   ws.send({cmd: SERVER_CMD_ERROR, data:'game with this id is already created'})
-      // }
-    }
-
-    if(msg.cmd == CLIENT_CMD_JOIN_ROOM){
-      
-      // generate player id, save, for now stub:
-      games[msg.gameid].pl2 = 102;
-      games[msg.gameid][102] = ws; //save player connect
-
-      ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: 'game joined'}));
-
-      games[msg.gameid].ready2 = true;
-
-    }
-
     switch (msg.cmd) {
-      case CLIENT_CMD_CREATE_ROOM:
-          
+      case CLIENT_CMD_CREATE_ROOM:         
+          // TODO: for later use 
+          // if(!games[message.gameid]) {
+
+          // }
+          // else{ //game already exist
+          //   ws.send({cmd: SERVER_CMD_ERROR, data:'game with this id is already created'})
+          // }
           games[msg.gameid] = {
             state: {pl1: 100, pl2: 102,},
             100: ws,
             ready1: true,
             ready2: false,
             started: false,
+            ball: new Ball(canvasW, canvasH)
           }
-          // send result
+
+          // send msg
           ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: 'game created'}));
-          //ws.send(JSON.stringify({cmd: SERVER_CMD_GAME_INFO, data: games[msg.gameid].state}));
         break;
-      case CLIENT_CMD_SEND:
-        // data from client player
-        // console.log('[gi]', msg.data.gameid, msg.data.pl, msg.data.ball);
-        // sync game state
+      case CLIENT_CMD_JOIN_ROOM:
+          // generate player id, save, for now stub:
+          games[msg.gameid].pl2 = 102;
+          games[msg.gameid][102] = ws; //save player connect
+
+          ws.send(JSON.stringify({cmd: SERVER_CMD_INFO, data: 'game joined'}));
+
+          games[msg.gameid].ready2 = true;
+        break;
+      case CLIENT_CMD_SEND: // data from client player        
+        // sync only player pad in game state
         games[msg.data.gameid].state[msg.data.pl.id] =  msg.data.pl;
-        games[msg.data.gameid].state.ball =  msg.data.ball;
-
-        // console.log('[gi-state]', games[msg.data.gameid]);
-
+        // games[msg.data.gameid].state.ball =  msg.data.ball;
         break;
       default:
         break;
