@@ -35,14 +35,14 @@ class Ball {
       
       if(this.x+this.r>w ||this.x-this.r<0){
         this.direction = this.direction * -1;
-        // console.log('[collide-x]', this.direction);
+        console.log('[collide-x]', this.direction);
         return true;
       }
   
       if(this.y+this.r>h ||this.y-this.r<0){
         this.direction = 180 - this.direction; 
         
-        // console.log('[collide-y]', this.direction);
+        console.log('[collide-y]', this.direction);
         return true;
       }
     }
@@ -63,5 +63,4 @@ class Ball {
       }
     }  
   };
-
-  export default Ball;
+module.exports = Ball;

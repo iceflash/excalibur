@@ -55,6 +55,7 @@ function syncGamesState(){
     ws.send(pck);
     ws2.send(pck);
     games[1].started = true;
+    games[1].ball.speed = 3;
     return;
   }
 
@@ -65,9 +66,12 @@ function syncGamesState(){
     // check collisions and make move ball
     games[1].ball.rectCollide(state[state.pl1]);
     games[1].ball.rectCollide(state[state.pl2]);
-    games[1].ball.borderCollide(canvasW, canvasH);
+    //games[1].ball.borderCollide(canvasW, canvasH);
     
     games[1].ball.move();
+
+    state.ball.x = games[1].ball.x;
+    state.ball.y = games[1].ball.y;
     
     // send info about game to players
     const pl1 = state.pl1;
@@ -89,7 +93,7 @@ function syncGamesState(){
   }
 }
 
-setInterval(syncGamesState, sendDataInterval);
+setInterval(syncGamesState, 1000/FPS);
 
 wss.on('connection', (ws) => {
   console.log('[new conn]');
@@ -113,7 +117,7 @@ wss.on('connection', (ws) => {
           //   ws.send({cmd: SERVER_CMD_ERROR, data:'game with this id is already created'})
           // }
           games[msg.gameid] = {
-            state: {pl1: 100, pl2: 102,},
+            state: {pl1: 100, pl2: 102, ball: {}},
             100: ws,
             ready1: true,
             ready2: false,
