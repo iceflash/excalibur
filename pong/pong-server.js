@@ -39,9 +39,9 @@ function syncGamesState() {
   // check if not started, but ready send get ready signal
   if (!games[1].started && games[1].ready1 && games[1].ready2) {
     // send get ready
-    const [state] = games[1];
-    const [pl1] = state;
-    const [pl2] = state;
+    const {state} = games[1];
+    const {pl1} = state;
+    const {pl2} = state;
 
     const ws = games[1][pl1];
     const ws2 = games[1][pl2];
@@ -71,8 +71,8 @@ function syncGamesState() {
     state.ball.y = games[1].ball.y;
 
     // send info about game to players
-    const [pl1] = state;
-    const [pl2] = state;
+    const {pl1} = state;
+    const {pl2} = state;
 
     const ws = games[1][pl1];
     const ws2 = games[1][pl2];
