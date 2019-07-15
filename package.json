@@ -8,7 +8,7 @@
     "simpleApp-dev": "webpack-dev-server --config ./simpleApp/webpack.config.js --mode=development --env.target=client",
     "simpleApp-build-dev": "webpack --config ./simpleApp/webpack.config.js --mode=development --env.target=client",
     "simpleApp-build": "webpack --config ./simpleApp/webpack.config.js --mode=production --env.target=client",
-    "ws": "node ./websocket/index.js"
+    "pong-srv": "node ./pong/pong-server.js"
   },
   "author": "iceflash",
   "license": "ISC",
