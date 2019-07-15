@@ -8,8 +8,7 @@
     "simpleApp-dev": "webpack-dev-server --config ./simpleApp/webpack.config.js --mode=development --env.target=client",
     "simpleApp-build-dev": "webpack --config ./simpleApp/webpack.config.js --mode=development --env.target=client",
     "simpleApp-build": "webpack --config ./simpleApp/webpack.config.js --mode=production --env.target=client",
-    "ws":"node ./websocket/index.js"
-
+    "ws": "node ./websocket/index.js"
   },
   "author": "iceflash",
   "license": "ISC",
@@ -18,9 +17,15 @@
     "babel": "^6.23.0",
     "babel-loader": "^8.0.6",
     "html-webpack-plugin": "^3.2.0",
-    "webpack": "^4.35.0",
+    "webpack": "^4.35.3",
     "webpack-cli": "^3.3.5",
     "webpack-dev-server": "^3.7.2",
     "ws": "^7.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-config-airbnb": "^17.1.1",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.18.0"
   }
 }
